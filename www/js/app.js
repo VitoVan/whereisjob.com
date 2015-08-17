@@ -1,4 +1,4 @@
-var APP_SESSION = {baseUrl:"http://localhost:8083/"};
+var APP_SESSION = {baseUrl:"http://localhost:8083/", threadUrl:'http://v2ex.com/t/'};
 APP_SESSION.cities = {};
 APP_SESSION.markers = [];
 APP_SESSION.jobs = [];
@@ -29,14 +29,32 @@ Box.Application.addModule('job', function(context) {
             moduleEl = context.getElement();
             jobService = context.getService('job');
         },
+        onclick: function(event, element, elementType) {
+        },
         onmessage: function(name, data){
             if(name === 'zoomComplete'){
                 console.log('show data',data);
+                $(moduleEl).find('ul').hide();
+                $(moduleEl).find('.job').not('.template').remove();
                 data.map(function(obj, index, arr){
                     jobService.getJob(obj.getExtData());
                 });
             }else if(name === 'jobComplete'){
                 console.log('showing data', data);
+                var template = $(moduleEl).find('.job.template').clone();
+                template.removeClass('template');
+                template.find('[name="company"]').html((data.company==='NIL' || data.company === '')?data.title:data.company);
+                template.find('[name="date"]').html(data.date);
+                template.find('[name="site"]').html(data.site==='NIL'?'':data.site);
+                template.find('[name="email"]').html(data.site==='NIL'?'':data.email);
+                template.find('[name="content"]').html(data.content.replace(/\n/g, '<br>'));
+                template.find('[name="source"]').attr('href',APP_SESSION.threadUrl + data.tid).html(APP_SESSION.threadUrl + data.tid);
+                template.find('[name="avatar"]').attr('src',data.avatar);
+                template.find('[name="cities"]').html(data.cities?data.cities.toString():'');
+                template.click(function(){
+                    $(this).find('[name="content"]').toggle();
+                });
+                $(moduleEl).append(template);
             }
         },
         destroy: function() {
@@ -77,6 +95,7 @@ Box.Application.addService('map', function(application){
                 $('.job-container').height($(document).height() - 70);
             });
             APP_SESSION.map = new AMap.Map('map-container', {
+                cursor: 'default',
 	            resizeEnable: true,
                 rotateEnable: true,
 	            view: new AMap.View2D({
@@ -90,6 +109,19 @@ Box.Application.addService('map', function(application){
                 APP_SESSION.map.setZoomAndCenter(APP_SESSION.map.getZoom() + 1, e.lnglat);
             });
             AMap.event.addListener(APP_SESSION.map, 'zoomend', function(e){
+                //after zoom, caculate current visible markers, and then broadcast
+                console.log('所有MARKER',APP_SESSION.markers);
+                var curMarkers = [];
+                APP_SESSION.markers.map(function(obj, index, arr){
+                    var curBounds = APP_SESSION.map.getBounds();
+                    if(curBounds.contains(obj.getPosition())){
+                        curMarkers.push(obj);
+                    }
+                });
+                console.log('当前可见MARKER',curMarkers);
+                application.broadcast('zoomComplete',curMarkers);
+            });
+            AMap.event.addListener(APP_SESSION.map, 'mapmove', function(e){
                 //after zoom, caculate current visible markers, and then broadcast
                 console.log('所有MARKER',APP_SESSION.markers);
                 var curMarkers = [];
@@ -153,14 +185,16 @@ Box.Application.addService('map', function(application){
             $.post(APP_SESSION.baseUrl + 'cities',function(data){
                 APP_SESSION.dataJobCities = data;
                 APP_SESSION.markers = [];
-                data.map(function(obj, index, arr){
-                    obj.cities.map(function(city){
-                        me.getCityLngLat(city,function(result){
-                            console.log(obj.id,city,result);
-                            me.addMarker(obj.id, result.geocodes[0].location);
-                        });                        
+                if(data){
+                    data.map(function(obj, index, arr){
+                        obj.cities.map(function(city){
+                            me.getCityLngLat(city,function(result){
+                                console.log(obj.id,city,result);
+                                me.addMarker(obj.id, result.geocodes[0].location);
+                            });                        
+                        });
                     });
-                });
+                }
             });
         }
     };

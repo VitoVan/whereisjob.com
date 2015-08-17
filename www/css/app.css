@@ -33,10 +33,34 @@ a:hover{
 .job-container{
     float: right;
     width: 20%;
-    background-color: #EEE;
-    background-color: rgba(238, 238, 238, 0.57);
     font-size: 1.1em;
-    line-height: 29px;    
+    line-height: 29px;
+    overflow-y: scroll;
+}
+.template{
+    display:none;
+}
+.job{
+    padding: 10px;
+    cursor: pointer;
+    box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1), 0px 0px 1px rgba(0, 0, 0, 0.1);
+    margin: 0 2px 6px 2px;
+}
+.job:hover{
+    background-color: rgba(26, 105, 164, 0.07) !important;
+}
+.job>div>a>img{
+    box-shadow: 0px 1px 3px 0px #D4D4D5, 0px 0px 0px 1px #D4D4D5;    
+}
+.job>div>a[name="user"]{
+    float: left;
+    margin-right: 10px;
+}
+.job>div[name="content"]{
+    display:none;
+    background-color: #fff !important;
+    padding: 10px;
+    border-radius: 10px;    
 }
 .amap-logo{
     display:none !important;

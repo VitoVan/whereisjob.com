@@ -43,6 +43,8 @@
         :initarg :avatar)
    (remote :accessor remote
            :initarg :remote)
+   (title :accessor title
+           :initarg :title)
    (cities :accessor cities
            :initarg :cities)
    (company :accessor company
@@ -190,7 +192,7 @@
           (setf word (cadr (split ":|：" line)))))
     (string-trim " " word)))
 
-(defun create-job(tid user avatar remote cities company site email content)
+(defun create-job(tid user avatar remote title cities company site email content)
   (cl-prevalence:tx-create-object
    *p-system*
    'job
@@ -198,6 +200,7 @@
      (user ,user)
      (avatar ,avatar)
      (remote ,remote)
+     (title ,title)
      (cities ,cities)
      (company ,company)
      (site ,site)
@@ -210,19 +213,25 @@
          (cities (get-cities title))
          (remote (if (find "remote" cities :test #'equal) t))
          (company (get-keyword job-dom "公司"))
-         (site (get-keyword job-dom "网站|官网"))
+         (site (get-keyword job-dom "网站|官网|主页"))
          (email (get-keyword job-dom "投递|邮箱|简历"))
          (content (get-content-text job-dom)))
-    (create-job tid user avatar remote cities company site email content))
+    (create-job tid user avatar remote title cities company site email content))
   (format t "~A ///" (get-title job-dom)))
 
+(defun find-job-by-tid(tid)
+  (cl-prevalence:find-object-with-slot *p-system* 'job 'tid tid))
+
 (defun parse-job-list(job-list)
-  (dolist (job job-list)
-    (parse-job
-     (get-job-dom (cadr job))
-     (car job)
-     (cadr job)))
-  (cl-prevalence:snapshot *p-system*))
+  (progn
+    (dolist (job job-list)
+      (if (find-job-by-tid (cadr job))
+          (format t "SUCKED, Skiping... ~A ~A " (cadr job) #\newline)
+          (parse-job
+           (get-job-dom (cadr job))
+           (cadr job)
+           (car job))))
+    (cl-prevalence:snapshot *p-system*)))
 
 (defun find-current-jobs()
   (append (cl-prevalence:find-objects-with-slot *p-system* 'job 'month (current-month))
@@ -251,6 +260,8 @@
 			 (push job result)))
 	result))
 
+(defun find-job-by-id(id)
+  (cl-prevalence:find-object-with-id *p-system* 'job id))
 
 (defun controller-cities()
   (setf (hunchentoot:content-type*) "application/json")
@@ -262,8 +273,7 @@
 
 (defun controller-job()
   (setf (hunchentoot:content-type*) "application/json")
-  (encode-json-to-string (cl-prevalence:find-object-with-id *p-system* 'job
-                                                            (parse-integer (parameter "id") :junk-allowed t))))
+  (encode-json-to-string (find-job-by-id (parse-integer (parameter "id") :junk-allowed t))))
 
 (setf *dispatch-table*
       (list
