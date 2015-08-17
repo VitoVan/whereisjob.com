@@ -1,0 +1,21 @@
+body{
+    font-family: "Helvetica Neue","Luxi Sans","DejaVu Sans",Tahoma,"Hiragino Sans GB","Microsoft Yahei","微软雅黑",sans-serif;
+    color: #000;
+    background: #FFF none repeat scroll 0% 0%;
+    font-size: 10pt;
+    clear: both;
+    padding: 0;
+    margin: 0;
+}
+h1{
+    margin: 1rem 0px 1rem 0;
+    display: inline-block;
+    border: medium none;
+    line-height: 1.2857em;
+    text-transform: none;
+    color: rgba(0, 0, 0, 0.87);
+    min-height: 1rem;    
+}
+.amap-marker-content{
+    font-weight: bold;
+}

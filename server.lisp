@@ -1,8 +1,22 @@
 (setf sb-impl::*default-external-format* :UTF-8)
 (declaim (optimize (debug 3)))
-(ql:quickload '(hunchentoot cl-prevalence cl-html5-parser drakma cl-ppcre cl-cron))
+(ql:quickload '(hunchentoot cl-prevalence cl-html5-parser drakma cl-ppcre cl-cron cl-json))
+
+(in-package :cl-prevalence)
+(defgeneric find-objects-with-slot (system class slot value &optional test)
+  (:documentation "Find and return the object in system of class with slot equal to value, null if not found"))
+;;Multiple Returns
+(defmethod find-objects-with-slot ((system prevalence-system) class slot value &optional (test #'equalp))
+  "Find and return the object in system of class with slot equal to value, null if not found"
+  (let* ((result))
+	(loop :for object :in (find-all-objects system class)
+	   :do (when (funcall test value (slot-value object slot))
+			 (push object result)))
+	result))
+(export 'find-objects-with-slot)
+
 (defpackage whereisjob
-  (:use :cl :hunchentoot :html5-parser :cl-ppcre :cl-cron))
+  (:use :cl :hunchentoot :html5-parser :cl-ppcre :cl-cron :json))
 (in-package :whereisjob)
 ;; Start Hunchentoot
 (setf *show-lisp-errors-p* t)
@@ -24,7 +38,9 @@
    (tid :accessor tid
         :initarg :tid)
    (user :accessor user
-         :initarg :user)   
+         :initarg :user)
+   (avatar :accessor avatar
+        :initarg :avatar)
    (remote :accessor remote
            :initarg :remote)
    (cities :accessor cities
@@ -121,6 +137,17 @@
            (return-from get-content-node node))))
      root-node))
 
+(defun get-avatar (root-node)
+  "this function maps its way through the DOM nodes till it finds a 
+   node with name 'img' and 'class' attribute equal to 'avatar', 
+   then returns src of that node"
+    (flex-dom-map #'standard-recurse-p
+     (lambda (node)
+       (if (equalp (node-name node) "img")
+       (if (equalp (element-attribute node "class") "avatar")
+           (return-from get-avatar (element-attribute node "src")))))
+     root-node))
+
 (defun get-content-text (root-node)
   (let ((job-node (get-content-node root-node)))
     (scrape-text job-node #'standard-recurse-p)))
@@ -163,8 +190,31 @@
           (setf word (cadr (split ":|：" line)))))
     (string-trim " " word)))
 
-(split ":|：" (scan-to-strings ".*?公司.*?[：|:].*?"  " 公司 : 天猫， tmall.com"))
+(defun create-job(tid user avatar remote cities company site email content)
+  (cl-prevalence:tx-create-object
+   *p-system*
+   'job
+   `((tid ,tid)
+     (user ,user)
+     (avatar ,avatar)
+     (remote ,remote)
+     (cities ,cities)
+     (company ,company)
+     (site ,site)
+     (email ,email)
+     (content ,content))))
 
+(defun parse-job(job-dom tid user)
+  (let* ((title (get-title job-dom))
+         (avatar (get-avatar job-dom))
+         (cities (get-cities title))
+         (remote (if (find "remote" cities :test #'equal) t))
+         (company (get-keyword job-dom "公司"))
+         (site (get-keyword job-dom "网站|官网"))
+         (email (get-keyword job-dom "投递|邮箱|简历"))
+         (content (get-content-text job-dom)))
+    (create-job tid user avatar remote cities company site email content))
+  (format t "~A ///" (get-title job-dom)))
 
 (defun parse-job-list(job-list)
   (dolist (job job-list)
@@ -174,38 +224,43 @@
      (cadr job)))
   (cl-prevalence:snapshot *p-system*))
 
-(defun parse-job(job-dom tid user)
-  (let* ((title (get-title job-dom))
-         (cities (get-cities title))
-         (remote (if (find "remote" cities :test #'equal) t))
-         (company (get-keyword job-dom "公司"))
-         (site (get-keyword job-dom "网站|官网"))
-         (email (get-keyword job-dom "投递|邮箱|简历"))
-         (content (get-content-text job-dom)))
-    (create-job tid user remote cities company site email content))
-  (format t "~A ///" (get-title job-dom)))
+(defun find-current-jobs()
+  (cl-prevalence:find-objects-with-slot *p-system* 'job 'month (current-month)))
+
+(defun find-current-cities()
+  (let* ((city-list nil))
+    (mapcar
+     #'(lambda(job)
+         (if (cities job) (setf city-list (append (append (list (id job)) (cities job)) city-list))))
+     (find-current-jobs))
+    city-list))
+
+(defun find-jobs-by-city(city)
+  (let* ((result))
+	(loop :for job :in (find-current-jobs)
+	   :do (when (find city (cities job) :test #'equal)
+			 (push job result)))
+	result))
 
 
-(defun create-job(tid user remote cities company site email content)
-  (cl-prevalence:tx-create-object
-   *p-system*
-   'job
-   `((tid ,tid)
-     (user ,user)
-     (remote ,remote)
-     (cities ,cities)
-     (company ,company)
-     (site ,site)
-     (email ,email)
-     (content ,content))))
+(defun controller-cities()
+  (setf (hunchentoot:content-type*) "application/json")
+  (encode-json-to-string (find-current-cities)))
 
+(defun controller-jobs-by-city()
+  (setf (hunchentoot:content-type*) "application/json")
+  (encode-json-to-string (find-jobs-by-city (parameter "city"))))
 
-(defun controller-map ()
-  (setf (hunchentoot:content-type*) "text/plain")
-  "fuck you")
+(defun controller-job()
+  (setf (hunchentoot:content-type*) "application/json")
+  (encode-json-to-string (cl-prevalence:find-object-with-id *p-system* 'job
+                                                            (parse-integer (parameter "id") :junk-allowed t))))
 
 (setf *dispatch-table*
-      (list (create-regex-dispatcher "^/map*" 'controller-map)))
+      (list
+       (create-regex-dispatcher "^/cities$" 'controller-cities)
+       (create-regex-dispatcher "^/jobs$" 'controller-jobs-by-city)
+       (create-regex-dispatcher "^/job$" 'controller-job)))
 
 
 ;;Cron Job
