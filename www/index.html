@@ -18,8 +18,33 @@
       <div class="head">
         <h1>Where is job?</h1>
       </div>
-      <div data-module="map">
-        <div class="map-container" id="map-container"></div>
+      <div>
+        <div class="map-container" id="map-container"  data-module="map"></div>
+        <div class="job-container"  data-module="job">
+          <div class="job template">
+            <div>
+              <img name="avatar" src=""></img>
+              <span name="company"></span>
+            </div>
+            <div>
+              <span name="date"></span>
+              <span name="cities"></span>
+            </div>
+            <div>
+              <span name="site"></span>
+              <span name="email"></span>
+            </div>
+            <div name="content"></div>
+            <div name="source"></div>
+          </div>
+          <ul>
+            <li>数据来源 <a href="http://v2ex.com/go/jobs">V2EX</a></li>
+            <li>每天 23:30 抽取「一天前」的数据</li>
+            <li>仅显示近两月数据</li>
+            <li>源码 <a href="https://github.com/VitoVan/whereisjob.com">GitHub</a></li>
+            <li>疑问 <a href="https://github.com/VitoVan/whereisjob.com/issues">Issues</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </body>

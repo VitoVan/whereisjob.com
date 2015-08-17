@@ -16,6 +16,31 @@ h1{
     color: rgba(0, 0, 0, 0.87);
     min-height: 1rem;    
 }
+a{
+    color: #4078C0;
+    text-decoration: none;;
+}
+a:hover{
+    text-decoration: underline;
+}
+.map-container{
+    width:80%;
+    float:left;
+}
 .amap-marker-content{
     font-weight: bold;
+}
+.job-container{
+    float: right;
+    width: 20%;
+    background-color: #EEE;
+    background-color: rgba(238, 238, 238, 0.57);
+    font-size: 1.1em;
+    line-height: 29px;    
+}
+.amap-logo{
+    display:none !important;
+}
+.amap-copyright{
+    display:none !important;
 }

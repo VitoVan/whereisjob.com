@@ -225,13 +225,22 @@
   (cl-prevalence:snapshot *p-system*))
 
 (defun find-current-jobs()
-  (cl-prevalence:find-objects-with-slot *p-system* 'job 'month (current-month)))
+  (append (cl-prevalence:find-objects-with-slot *p-system* 'job 'month (current-month))
+          (cl-prevalence:find-objects-with-slot *p-system* 'job 'month (- (current-month) 1))))
+
+(defclass job-cities()
+  ((id :accessor id
+          :initarg :id)
+   (cities :accessor cities
+            :initarg :cities)))
 
 (defun find-current-cities()
   (let* ((city-list nil))
     (mapcar
      #'(lambda(job)
-         (if (cities job) (setf city-list (append (append (list (id job)) (cities job)) city-list))))
+         (if (cities job) (push
+                           (make-instance 'job-cities :cities (cities job) :id (id job))
+                           city-list)))
      (find-current-jobs))
     city-list))
 
