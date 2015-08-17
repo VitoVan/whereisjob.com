@@ -97,6 +97,9 @@
       (drakma:http-request (concatenate 'string "http://v2ex.com/go/jobs?p=" page))
     (parse-html5 jobs-html)))
 
+
+(defvar *yesterday-str* " •  1 天前  • ")
+    
 (defun get-job-list (root-node)
   "this function maps its way through the DOM nodes till it finds a 
    node with name 'div' and 'class' attribute has 'cell from_', 
@@ -107,7 +110,7 @@
                     (if (equalp (node-name node) "div")
                         (let* ((class-name (element-attribute node "class"))
                                (ids (cl-ppcre:split " " (cl-ppcre:regex-replace-all "cell from_|t_" class-name ""))))
-                          (if (and (search "cell from_" class-name) (search " •  1 天前  • " (scrape-text node #'standard-recurse-p)))
+                          (if (and (search "cell from_" class-name) (search *yesterday-str* (scrape-text node #'standard-recurse-p)))
                               (progn
                                 (format t "USER: ~a,THREAD:~a ~a" (car ids) (cadr ids) #\newline)
                                 (push ids job-list))))))
