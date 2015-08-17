@@ -21,7 +21,7 @@
 ;; Start Hunchentoot
 (setf *show-lisp-errors-p* t)
 (setf *acceptor* (make-instance 'hunchentoot:easy-acceptor
-                                :port 8083
+                                :port 8082
                                 :access-log-destination "log/access.log"
                                 :message-log-destination "log/message.log"
                                 :error-template-directory  "www/errors/"
@@ -256,23 +256,12 @@
      (find-current-jobs))
     city-list))
 
-(defun find-jobs-by-city(city)
-  (let* ((result))
-	(loop :for job :in (find-current-jobs)
-	   :do (when (find city (cities job) :test #'equal)
-			 (push job result)))
-	result))
-
 (defun find-job-by-id(id)
   (cl-prevalence:find-object-with-id *p-system* 'job id))
 
 (defun controller-cities()
   (setf (hunchentoot:content-type*) "application/json")
   (encode-json-to-string (find-current-cities)))
-
-(defun controller-jobs-by-city()
-  (setf (hunchentoot:content-type*) "application/json")
-  (encode-json-to-string (find-jobs-by-city (parameter "city"))))
 
 (defun controller-job()
   (setf (hunchentoot:content-type*) "application/json")
@@ -281,7 +270,6 @@
 (setf *dispatch-table*
       (list
        (create-regex-dispatcher "^/cities$" 'controller-cities)
-       (create-regex-dispatcher "^/jobs$" 'controller-jobs-by-city)
        (create-regex-dispatcher "^/job$" 'controller-job)))
 
 
