@@ -23,6 +23,9 @@ a{
 a:hover{
     text-decoration: underline;
 }
+.head{
+    padding-left: 20px;
+}
 .map-container{
     width:80%;
     float:left;
@@ -79,7 +82,26 @@ a:hover{
     background: #4088C0;
     text-align: center;
 }
-.loading>h3{
-    margin-top: 10%;
-    font-size: 4em;
+@keyframes pulse {
+    from {color: #FFF;}
+    to {color: #739EBF;}
 }
+@-webkit-keyframes pulse
+{
+    from {color: #FFF;}
+    to {color: #739EBF;}
+}
+.loading>h3{
+    font-size: 4em;
+    margin-top: 10%;
+    -webkit-animation-name: pulse;
+    animation-name: pulse;
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+}
+
+
