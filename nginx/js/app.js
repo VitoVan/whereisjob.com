@@ -166,6 +166,9 @@ Box.Application.addService('map', function(application){
 				position: location,
                 extData: id
 			});
+            AMap.event.addListener(marker, 'click', function(e){
+                APP_SESSION.map.setZoomAndCenter(APP_SESSION.map.getZoom() + 1, e.lnglat);
+            });
             APP_SESSION.markers.push(marker);
             //if markers is ready, show the cluster
             if(APP_SESSION.markers.length === APP_SESSION.dataJobCities.length){
