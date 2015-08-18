@@ -178,6 +178,8 @@ Box.Application.addService('map', function(application){
                 APP_SESSION.map.plugin(["AMap.MarkerClusterer"],function(){
 				    APP_SESSION.cluster = new AMap.MarkerClusterer(APP_SESSION.map, APP_SESSION.markers, {styles:sts});
 			    });
+                // then remove the loading stuff
+                $('.loading').remove();
             }
         },
         getCities: function(){
