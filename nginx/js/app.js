@@ -1,4 +1,4 @@
-var APP_SESSION = {baseUrl:"http://localhost:8083/", threadUrl:'http://v2ex.com/t/'};
+var APP_SESSION = {baseUrl:"http://whereisjob.com/", threadUrl:'http://v2ex.com/t/'};
 APP_SESSION.cities = {};
 APP_SESSION.markers = [];
 APP_SESSION.jobs = [];
