@@ -43,15 +43,16 @@ Box.Application.addModule('job', function(context) {
                 console.log('showing data', data);
                 var template = $(moduleEl).find('.job.template').clone();
                 template.removeClass('template');
-                template.find('[name="company"]').html((data.company==='NIL' || data.company === '')?data.title:data.company);
-                template.find('[name="date"]').html(data.date);
+                template.find('[name="title"]').html(data.title);
+                template.find('[name="date"]').html(new Date(data.date * 1000 - 60 * 60 * 24 * 1000).pattern("MM月dd日"));
                 template.find('[name="site"]').html(data.site==='NIL'?'':data.site);
                 template.find('[name="email"]').html(data.site==='NIL'?'':data.email);
                 template.find('[name="content"]').html(data.content.replace(/\n/g, '<br>'));
                 template.find('[name="source"]').attr('href',APP_SESSION.threadUrl + data.tid).html(APP_SESSION.threadUrl + data.tid);
                 template.find('[name="avatar"]').attr('src',data.avatar);
                 template.find('[name="cities"]').html(data.cities?data.cities.toString():'');
-                template.click(function(){
+                template.click(function(e){
+                    console.log(e);
                     $(this).find('[name="content"]').toggle();
                 });
                 $(moduleEl).append(template);
