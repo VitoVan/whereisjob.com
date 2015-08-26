@@ -51,9 +51,14 @@ Box.Application.addModule('job', function(context) {
                 template.find('[name="source"]').attr('href',APP_SESSION.threadUrl + data.tid).html(APP_SESSION.threadUrl + data.tid);
                 template.find('[name="avatar"]').attr('src',data.avatar);
                 template.find('[name="cities"]').html(data.cities?data.cities.toString():'');
-                template.click(function(e){
+                template.find('[name="more"]').click(function(e){
                     console.log(e);
-                    $(this).find('[name="content"]').toggle();
+                    template.find('[name="content"]').toggle();
+                    if(template.find('[name="content"]').is(':visible')){
+                        $(this).text('[Hide]');
+                    }else{
+                        $(this).text('[More]');                        
+                    }
                 });
                 $(moduleEl).append(template);
             }
