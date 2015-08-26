@@ -242,7 +242,17 @@
            (get-job-dom (cadr job))
            (cadr job)
            (car job))))
+    (delete-outdate-jobs)
     (cl-prevalence:snapshot *p-system*)))
+
+(defun delete-outdate-jobs()
+  (mapcar
+   #'(lambda (item)
+       (cl-prevalence:tx-delete-object *p-system* 'job
+                                       (id item)))
+   (cl-prevalence:find-objects-with-slot *p-system* 'job 'date (- (get-unix-time) (* 60 60 24 15)) #'>)))
+
+
 
 (defun find-current-jobs()
   (cl-prevalence:find-objects-with-slot *p-system* 'job 'date (- (get-unix-time) (* 60 60 24 15)) #'<))

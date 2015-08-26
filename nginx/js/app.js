@@ -44,7 +44,7 @@ Box.Application.addModule('job', function(context) {
                 var template = $(moduleEl).find('.job.template').clone();
                 template.removeClass('template');
                 template.find('[name="title"]').html(data.title);
-                template.find('[name="date"]').html(new Date(data.date * 1000 - 60 * 60 * 24 * 1000).pattern("MM月dd日"));
+                template.find('[name="date"]').html(new Date(data.date * 1000).pattern("MM月dd日"));
                 template.find('[name="site"]').html(data.site==='NIL'?'':data.site);
                 template.find('[name="email"]').html(data.site==='NIL'?'':data.email);
                 template.find('[name="content"]').html(data.content.replace(/\n/g, '<br>'));
