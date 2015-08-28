@@ -40,7 +40,6 @@ Box.Application.addModule('job', function(context) {
                     jobService.getJob(obj.getExtData());
                 });
             }else if(name === 'jobComplete'){
-                console.log('showing data', data);
                 var template = $(moduleEl).find('.job.template').clone();
                 template.removeClass('template');
                 template.find('[name="title"]').html(data.title);
@@ -114,22 +113,9 @@ Box.Application.addService('map', function(application){
             AMap.event.addListener(APP_SESSION.map, 'click', function(e){
                 APP_SESSION.map.setZoomAndCenter(APP_SESSION.map.getZoom() + 1, e.lnglat);
             });
-            AMap.event.addListener(APP_SESSION.map, 'zoomend', function(e){
+            AMap.event.addListener(APP_SESSION.map, 'moveend', function(e){
                 //after zoom, caculate current visible markers, and then broadcast
-                console.log('所有MARKER',APP_SESSION.markers);
-                var curMarkers = [];
-                APP_SESSION.markers.map(function(obj, index, arr){
-                    var curBounds = APP_SESSION.map.getBounds();
-                    if(curBounds.contains(obj.getPosition())){
-                        curMarkers.push(obj);
-                    }
-                });
-                console.log('当前可见MARKER',curMarkers);
-                application.broadcast('zoomComplete',curMarkers);
-            });
-            AMap.event.addListener(APP_SESSION.map, 'mapmove', function(e){
-                //after zoom, caculate current visible markers, and then broadcast
-                console.log('所有MARKER',APP_SESSION.markers);
+                console.log('MOVE::::所有MARKER',APP_SESSION.markers);
                 var curMarkers = [];
                 APP_SESSION.markers.map(function(obj, index, arr){
                     var curBounds = APP_SESSION.map.getBounds();
