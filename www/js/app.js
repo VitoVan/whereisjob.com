@@ -42,6 +42,9 @@ Box.Application.addModule('job', function(context) {
             }else if(name === 'jobComplete'){
                 var template = $(moduleEl).find('.job.template').clone();
                 template.removeClass('template');
+                if(data.cities.toString().indexOf('remote') !== -1){
+                    template.addClass('remote');
+                }
                 template.find('[name="title"]').html(data.title);
                 template.find('[name="date"]').html(new Date(data.date * 1000).pattern("MM月dd日"));
                 template.find('[name="site"]').html(data.site==='NIL'?'':data.site);
@@ -187,7 +190,10 @@ Box.Application.addService('map', function(application){
                         obj.cities.map(function(city){
                             me.getCityLngLat(city,function(result){
                                 console.log(obj.id,city,result);
-                                me.addMarker(obj.id, result.geocodes[0].location);
+                                //skip remote
+                                if(city !== 'remote'){
+                                    me.addMarker(obj.id, result.geocodes[0].location);
+                                }
                             });                        
                         });
                     });
