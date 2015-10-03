@@ -52,7 +52,7 @@ a:hover{
     background-color: beige;
 }
 .job.remote:hover{
-    background-color: cornsilk;
+    background-color: cornsilk !important;
 }
 .job:hover{
     background-color: rgba(26, 105, 164, 0.07) !important;
