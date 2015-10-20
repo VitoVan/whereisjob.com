@@ -190,10 +190,10 @@ Box.Application.addService('map', function(application){
                         obj.cities.map(function(city){
                             me.getCityLngLat(city,function(result){
                                 console.log(obj.id,city,result);
-                                //skip remote
-                                if(city !== 'remote'){
+                                //do not skip remote
+                                //if(city !== 'remote'){
                                     me.addMarker(obj.id, result.geocodes[0].location);
-                                }
+                                //}
                             });                        
                         });
                     });
