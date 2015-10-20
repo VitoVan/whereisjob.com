@@ -1,5 +1,5 @@
 var APP_SESSION = {baseUrl:"/", threadUrl:'http://v2ex.com/t/'};
-APP_SESSION.cities = {};
+APP_SESSION.cities = {'remote':{geocodes:[{location:{lat:0,lng:0}}]}};
 APP_SESSION.markers = [];
 APP_SESSION.jobs = [];
 
@@ -190,10 +190,10 @@ Box.Application.addService('map', function(application){
                         obj.cities.map(function(city){
                             me.getCityLngLat(city,function(result){
                                 console.log(obj.id,city,result);
-                                //do not skip remote
-                                //if(city !== 'remote'){
+                                //skip remote
+                                if(city !== 'remote'){
                                     me.addMarker(obj.id, result.geocodes[0].location);
-                                //}
+                                }
                             });                        
                         });
                     });
